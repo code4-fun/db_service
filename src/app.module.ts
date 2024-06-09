@@ -16,8 +16,7 @@ import { GenerateUsers1717936752241 } from './migrations/1717936752241-GenerateU
       entities: [User],
       migrations: [GenerateUsers1717936752241],
       autoLoadEntities: true,
-      synchronize: true,
-      logging: true
+      synchronize: true
     }),
     UserModule,
   ]

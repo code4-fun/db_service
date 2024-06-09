@@ -11,14 +11,32 @@ export class UserService {
   ) {}
 
   async updateIssuesFlag(): Promise<number> {
-    const usersWithIssuesCount = await this.userRepository.count({ where: { hasIssues: true } });
+    const batchSize = 10000;
+    let totalUpdated = 0;
+    const usersWithProblems = await this.userRepository.find({ select: ["id"], where: { hasIssues: true } });
+    const idsToUpdate = usersWithProblems.map(user => user.id);
 
-    await this.userRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ hasIssues: false })
-      .execute();
+    const updateBatch = async (startIndex: number): Promise<void> => {
+      const idsBatch = idsToUpdate.slice(startIndex, startIndex + batchSize);
+      if (idsBatch.length === 0) {
+        return;
+      }
 
-    return usersWithIssuesCount;
+      await this.userRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ hasIssues: false })
+        .where('id IN (:...ids)', { ids: idsBatch })
+        .execute();
+
+      totalUpdated += idsBatch.length;
+      console.log(`End updating batch at ${new Date().toISOString()}, total updated: ${totalUpdated}`);
+
+      await updateBatch(startIndex + batchSize);
+    };
+
+    await updateBatch(0);
+
+    return totalUpdated;
   }
 }
