@@ -22,15 +22,20 @@ export class UserService {
         return;
       }
 
-      await this.userRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({ hasIssues: false })
-        .where('id IN (:...ids)', { ids: idsBatch })
-        .execute();
+      try{
+        await this.userRepository
+          .createQueryBuilder()
+          .update(User)
+          .set({ hasIssues: false })
+          .where('id IN (:...ids)', { ids: idsBatch })
+          .execute();
 
-      totalUpdated += idsBatch.length;
-      console.log(`End updating batch at ${new Date().toISOString()}, total updated: ${totalUpdated}`);
+        totalUpdated += idsBatch.length;
+        console.log(`End updating batch at ${new Date().toISOString()}, total updated: ${totalUpdated}`);
+      } catch(error){
+        console.error(`Error updating batch at ${new Date().toISOString()}, total updated: ${totalUpdated}`, error);
+        throw error;
+      }
 
       await updateBatch(startIndex + batchSize);
     };

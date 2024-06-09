@@ -1,3 +1,7 @@
+## Описание
+
+Создается таблица usr с миллионом записей
+
 ## Сборка и запуск
 
 `git clone https://github.com/code4-fun/db_service.git`
